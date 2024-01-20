@@ -1,0 +1,11 @@
+<user-mapping>
+    <authorize username="vagrant" password="vagrant">
+        <connection name="siem">
+            <protocol>ssh</protocol>
+            <param name="hostname">192.168.56.20</param>
+            <param name="port">22</param>
+            <param name="username">vagrant</param>
+            <param name="password">vagrant</param>
+        </connection>
+    </authorize>
+</user-mapping>

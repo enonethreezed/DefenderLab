@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |cfg|
+  cfg.vm.box = "bento/ubuntu-22.04"
+  cfg.vm.hostname = "siem"
+  cfg.vm.network :private_network, ip: "192.168.56.20", gateway: "192.168.56.1", dns: "8.8.8.8"
+  cfg.vm.network "forwarded_port", guest: 8080, host: 8080, protocol: "tcp", auto_correct: true
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    cfg.vbguest.auto_update = false  
+  end
+  # cfg.vm.provision :shell, path: "scripts/siem.bash", privileged: true
+  cfg.vm.provision :shell, path: "scripts/guacamole.bash", privileged: true
+  cfg.vm.provider "virtualbox" do |vb, override|
+    vb.gui = false
+    vb.name = "siem"
+    home = Dir.home.to_s + "/VirtualBox VMs"
+    siem_disk = home + "/splunk.vdi"
+    # Check for second disk on init and reload
+    if (ARGV[0] == "up" || ARGV[0] == "reload") && !File.exist?(siem_disk)
+      vb.customize ["createhd", "--filename", siem_disk, "--size", 200 * 1024]
+      vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", siem_disk]
+    end
+    vb.customize ["modifyvm", :id, "--memory", 4096]
+    vb.customize ["modifyvm", :id, "--cpus", 2]
+    vb.customize ["modifyvm", :id, "--vram", "32"]
+    vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+  end
+end
