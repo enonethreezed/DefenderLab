@@ -12,12 +12,15 @@ echo "apt-fast apt-fast/dlflag boolean true" | debconf-set-selections
 DEBIAN_FRONTEND=noninteractive apt update
 DEBIAN_FRONTEND=noninteractive apt install -y gcc nano vim curl wget g++ libcairo2-dev libjpeg-turbo8-dev libpng-dev libtool-bin libossp-uuid-dev
 DEBIAN_FRONTEND=noninteractive apt install -y libavcodec-dev  libavformat-dev libavutil-dev libswscale-dev build-essential libpango1.0-dev libssh2-1-dev libvncserver-dev libtelnet-dev libpulse-dev libvorbis-dev libwebp-dev
+
 DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:remmina-ppa-team/remmina-next-daily
 DEBIAN_FRONTEND=noninteractive apt update
 DEBIAN_FRONTEND=noninteractive apt install -y freerdp2-dev freerdp2-x11 -y
+
 DEBIAN_FRONTEND=noninteractive apt install -y default-jdk
 DEBIAN_FRONTEND=noninteractive apt install -y tomcat9 tomcat9-admin tomcat9-common tomcat9-user
 systemctl enable --now tomcat9
+
 mkdir src
 cd src
 VER=1.5.3
@@ -28,6 +31,7 @@ cd guacamole-server-*/
 make
 make install
 ldconfig
+
 mkdir  -p /etc/guacamole/{extensions,lib}
 cat > /etc/guacamole/guacd.conf << EOF
 [daemon]
@@ -43,12 +47,15 @@ bind_port = 4822
 #server_certificate = /etc/ssl/certs/guacd.crt
 #server_key = /etc/ssl/private/guacd.key
 EOF
+
 # https://guacamole.apache.org/doc/gug/configuring-guacamole.html
 cp /vagrant/guacamole/guacamole.properties /etc/guacamole/
 cp /vagrant/guacamole/user-mapping.xml /etc/guacamole/
+
 systemctl daemon-reload
 systemctl restart guacd
 systemctl enable guacd
+
 cd /root/src
 VER=1.5.3
 wget https://archive.apache.org/dist/guacamole/$VER/binary/guacamole-$VER.war
