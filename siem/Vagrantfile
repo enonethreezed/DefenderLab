@@ -5,16 +5,19 @@ Vagrant.configure("2") do |cfg|
   cfg.vm.hostname = "siem"
   cfg.vm.network :private_network, ip: "192.168.56.20", gateway: "192.168.56.1", dns: "8.8.8.8"
   cfg.vm.network "forwarded_port", guest: 8080, host: 8080, protocol: "tcp", auto_correct: true
+  cfg.vm.network "forwarded_port", guest: 9300, host: 9300, protocol: "tcp", auto_correct: true
+  cfg.vm.network "forwarded_port", guest: 9200, host: 9200, protocol: "tcp", auto_correct: true
   if Vagrant.has_plugin?("vagrant-vbguest")
     cfg.vbguest.auto_update = false  
   end
-  # cfg.vm.provision :shell, path: "scripts/siem.bash", privileged: true
+  cfg.vm.provision :shell, path: "scripts/siem.bash", privileged: true
   cfg.vm.provision :shell, path: "scripts/guacamole.bash", privileged: true
+  cfg.vm.provision :shell, path: "scripts/elk.bash", privileged: true
   cfg.vm.provider "virtualbox" do |vb, override|
     vb.gui = false
     vb.name = "siem"
     home = Dir.home.to_s + "/VirtualBox VMs"
-    siem_disk = home + "/splunk.vdi"
+    siem_disk = home + "/elastic.vdi"
     # Check for second disk on init and reload
     if (ARGV[0] == "up" || ARGV[0] == "reload") && !File.exist?(siem_disk)
       vb.customize ["createhd", "--filename", siem_disk, "--size", 200 * 1024]
